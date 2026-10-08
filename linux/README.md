@@ -87,6 +87,11 @@ StartupWMClass=GitExtensions
 * Transparent `BackColor` on tool strips removed (Mono rejects it on those controls).
 * The crash reporter no longer uses the Windows task dialog; errors go to stderr and to the
   built-in bug report form.
+* Mono's Windows Forms imports the desktop (GTK) colour scheme into `SystemColors`, but only
+  partially, so a dark desktop theme produced a mix of dark and white surfaces. At startup the
+  application now resets Mono's colour table to the light Windows palette
+  (`GitExtUtils/GitUI/MonoSystemColors.cs`); the UI is always light regardless of the
+  desktop theme.
 
 ## Known limitations
 

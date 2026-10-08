@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
@@ -36,6 +36,7 @@ namespace GitExtensions
             }
 
             Application.EnableVisualStyles();
+            MonoSystemColors.ForceLightPalette();
             Application.SetCompatibleTextRenderingDefault(false);
 
             // If an error happens before we had a chance to init the environment information
