@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -194,13 +194,29 @@ namespace GitExtUtils.GitUI.Theming
 
         public static Bitmap AdaptLightness(this Bitmap original)
         {
-            if (ThemeSettings == ThemeSettings.Default)
+            if (ThemeSettings == ThemeSettings.Default || ThemeSettings.Theme == Theme.Default)
             {
                 return original;
             }
 
-            var clone = (Bitmap)original.Clone();
-            new LightnessCorrection(clone).Execute();
+            // Linux/Mono build: libgdiplus cannot LockBits with a pixel format other than the bitmap's own,
+            // so draw into a fresh 32bpp ARGB bitmap first and fall back to the original on failure.
+            var clone = new Bitmap(original.Width, original.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using (var graphics = Graphics.FromImage(clone))
+            {
+                graphics.DrawImage(original, 0, 0, original.Width, original.Height);
+            }
+
+            try
+            {
+                new LightnessCorrection(clone).Execute();
+            }
+            catch (ArgumentException)
+            {
+                clone.Dispose();
+                return original;
+            }
+
             return clone;
         }
 

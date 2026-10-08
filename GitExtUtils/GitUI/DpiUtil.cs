@@ -22,6 +22,26 @@ namespace GitExtUtils.GitUI
 
         static DpiUtil()
         {
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            {
+                // Mono: no user32/gdi32; ask GDI+ for the screen resolution instead.
+                try
+                {
+                    using var graphics = Graphics.FromHwnd(IntPtr.Zero);
+                    DpiX = (int)graphics.DpiX;
+                    DpiY = (int)graphics.DpiY;
+                }
+                catch
+                {
+                    DpiX = 96;
+                    DpiY = 96;
+                }
+
+                ScaleX = DpiX / 96.0f;
+                ScaleY = DpiY / 96.0f;
+                return;
+            }
+
             using var hdc = GetDC(IntPtr.Zero);
             try
             {

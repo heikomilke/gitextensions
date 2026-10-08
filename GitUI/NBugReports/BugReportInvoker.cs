@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.ComponentModel;
@@ -87,6 +87,25 @@ namespace GitUI.NBugReports
 
         public static void Report(Exception exception, bool isTerminating)
         {
+            // Linux/Mono build: always log to stderr, and use the WinForms report form instead of
+            // the Windows TaskDialog / BugReporter.exe (both need Win32-only APIs).
+            Console.Error.WriteLine($"[GitExtensions] {(isTerminating ? "FATAL" : "ERROR")}: {exception}");
+            try
+            {
+                ShowNBug(OwnerForm, exception, exception is ExternalOperationException, isTerminating);
+            }
+            catch (Exception reportException)
+            {
+                Console.Error.WriteLine($"[GitExtensions] failed to show bug report form: {reportException}");
+                if (isTerminating)
+                {
+                    Environment.Exit(-1);
+                }
+            }
+
+            return;
+
+#pragma warning disable CS0162 // Unreachable code (legacy Windows path kept for reference)
             if (AppSettings.WriteErrorLog)
             {
                 LogError(exception, isTerminating);
@@ -164,6 +183,7 @@ namespace GitUI.NBugReports
                 taskDialog.Controls.Add(taskDialogCommandLink);
             }
         }
+#pragma warning restore CS0162
 
         private static void ShowNBug(IWin32Window? owner, Exception exception, bool isExternalOperation, bool isTerminating)
         {

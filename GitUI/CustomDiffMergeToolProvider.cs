@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
@@ -106,7 +106,11 @@ namespace GitUI
             {
                 foreach (var menu in menus)
                 {
-                    menu.MenuItem.DropDown = null;
+                    // Linux/Mono build: Mono's ToolStripDropDownItem throws on DropDown = null; clear items instead.
+                    if (menu.MenuItem.HasDropDownItems)
+                    {
+                        menu.MenuItem.DropDownItems.Clear();
+                    }
                 }
             }
         }

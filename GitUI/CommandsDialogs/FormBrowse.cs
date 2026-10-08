@@ -323,11 +323,11 @@ namespace GitUI.CommandsDialogs
 
             RevisionGrid.ToggledBetweenArtificialAndHeadCommits += (s, e) => FocusRevisionDiffFileStatusList();
 
-            toolPanel.TopToolStripPanel.BackColor = Color.Transparent;
-            mainMenuStrip.BackColor = Color.Transparent;
-            ToolStripMain.BackColor = Color.Transparent;
-            ToolStripFilters.BackColor = Color.Transparent;
-            ToolStripScripts.BackColor = Color.Transparent;
+            // Linux/Mono build: transparent BackColor unsupported here. toolPanel.TopToolStripPanel.BackColor = Color.Transparent;
+            // Linux/Mono build: transparent BackColor unsupported here. mainMenuStrip.BackColor = Color.Transparent;
+            // Linux/Mono build: transparent BackColor unsupported here. ToolStripMain.BackColor = Color.Transparent;
+            // Linux/Mono build: transparent BackColor unsupported here. ToolStripFilters.BackColor = Color.Transparent;
+            // Linux/Mono build: transparent BackColor unsupported here. ToolStripScripts.BackColor = Color.Transparent;
 
             BackColor = OtherColors.BackgroundColor;
 

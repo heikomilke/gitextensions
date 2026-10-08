@@ -357,7 +357,7 @@ namespace GitUI.CommandsDialogs.BrowseDialog
                 return false;
             }
 
-            return NativeMethods.IsIconic(currentProcess.MainWindowHandle).IsTrue();
+            return false; // Linux/Mono build: no user32.IsIconic
         }
 
         private void Update()

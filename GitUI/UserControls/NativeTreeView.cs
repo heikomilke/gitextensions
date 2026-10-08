@@ -7,7 +7,7 @@ namespace GitUI.UserControls
         protected override void CreateHandle()
         {
             base.CreateHandle();
-            NativeMethods.SetWindowTheme(Handle, "explorer", null);
+            // Linux/Mono build: no uxtheme.SetWindowTheme
         }
     }
 }

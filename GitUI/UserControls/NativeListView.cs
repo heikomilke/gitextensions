@@ -11,7 +11,7 @@ namespace GitUI.UserControls
         {
             BeginCreateHandle?.Invoke(this, EventArgs.Empty);
             base.CreateHandle();
-            NativeMethods.SetWindowTheme(Handle, "explorer", null);
+            // Linux/Mono build: no uxtheme.SetWindowTheme
             EndCreateHandle?.Invoke(this, EventArgs.Empty);
         }
     }

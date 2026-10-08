@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -64,19 +64,8 @@ namespace GitUI.UserControls
                         : _hovered ? _borderHoveredColor
                         : _borderDefaultColor;
 
-                    IntPtr windowDC = NativeMethods.GetWindowDC(Handle);
-                    try
-                    {
-                        using Graphics graphics = Graphics.FromHdc(windowDC);
-                        using Pen pen = new(penColor);
-
-                        ControlPaint.DrawBorder(graphics, ClientRectangle, penColor, ButtonBorderStyle.Solid);
-                    }
-                    finally
-                    {
-                        NativeMethods.ReleaseDC(Handle, windowDC);
-                    }
-
+                    // Linux/Mono build: no GetWindowDC; keep the default border.
+                    _ = penColor;
                     break;
 
                 case NativeMethods.WM_NCMOUSEHOVER when !_hovered:

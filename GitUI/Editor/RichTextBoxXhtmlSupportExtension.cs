@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -33,13 +33,9 @@ namespace GitUI.Editor.RichTextBoxExtension
         /// </remarks>
         private static IntPtr BeginUpdate(HandleRef handleRef)
         {
-            // Prevent the control from raising any events.
-            IntPtr oldEventMask = NativeMethods.SendMessage(handleRef,
-                NativeMethods.EM_SETEVENTMASK, IntPtr.Zero, IntPtr.Zero);
-
-            // Prevent the control from redrawing itself.
-            NativeMethods.SendMessage(handleRef,
-                NativeMethods.WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
+            // Linux/Mono build: no user32.SendMessage; nothing to suspend.
+            IntPtr oldEventMask = IntPtr.Zero;
+            _ = handleRef;
 
             return oldEventMask;
         }
@@ -60,13 +56,8 @@ namespace GitUI.Editor.RichTextBoxExtension
         /// </remarks>
         private static void EndUpdate(HandleRef handleRef, IntPtr oldEventMask)
         {
-            // Allow the control to redraw itself.
-            NativeMethods.SendMessage(handleRef,
-                NativeMethods.WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
-
-            // Allow the control to raise event messages.
-            NativeMethods.SendMessage(handleRef,
-                NativeMethods.EM_SETEVENTMASK, IntPtr.Zero, oldEventMask);
+            // Linux/Mono build: nothing was suspended.
+            _ = (handleRef, oldEventMask);
         }
 
         public static void EndUpdate(this RichTextBox rtb, IntPtr oldEventMask)

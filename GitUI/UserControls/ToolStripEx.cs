@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows.Forms;
@@ -16,8 +16,9 @@ namespace GitUI
         {
             this.UseCustomRenderer();
 
+            // Linux/Mono build: Mono's ToolStrip has no internal "Grip" property.
             PropertyInfo propGrip = GetType().GetProperty("Grip", BindingFlags.Instance | BindingFlags.NonPublic);
-            _gripButton = propGrip.GetValue(this) as ToolStripButton;
+            _gripButton = propGrip?.GetValue(this) as ToolStripButton;
         }
 
         /// <summary>
@@ -43,8 +44,14 @@ namespace GitUI
         [DefaultValue(true)]
         public bool GripEnabled
         {
-            get => _gripButton.Enabled;
-            set => _gripButton.Enabled = value;
+            get => _gripButton?.Enabled ?? false;
+            set
+            {
+                if (_gripButton is not null)
+                {
+                    _gripButton.Enabled = value;
+                }
+            }
         }
 
         protected override void WndProc(ref Message m)

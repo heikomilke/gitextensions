@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Drawing;
@@ -24,10 +24,7 @@ namespace GitUI
             }
             finally
             {
-                if (handle != IntPtr.Zero)
-                {
-                    NativeMethods.DestroyIcon(handle);
-                }
+                _ = handle; // Linux/Mono build: no user32.DestroyIcon
             }
         }
     }

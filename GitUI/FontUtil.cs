@@ -1,4 +1,4 @@
-﻿namespace GitUI
+namespace GitUI
 {
     using System;
     using System.Drawing;
@@ -8,7 +8,8 @@
 #pragma warning disable SA1305 // Field names should not use Hungarian notation
         static FontUtil()
         {
-            var hTheme = NativeMethods.OpenThemeData(IntPtr.Zero, "TEXTSTYLE");
+            // Linux/Mono build: no uxtheme. Use a larger system font for "main instruction" text.
+            var hTheme = IntPtr.Zero;
             if (hTheme != IntPtr.Zero)
             {
                 NativeMethods.GetThemeFont(hTheme, IntPtr.Zero, NativeMethods.TEXT_MAININSTRUCTION, 0, NativeMethods.TMT_FONT, out var pFont);
@@ -24,8 +25,9 @@
             }
             else
             {
-                MainInstructionFont = SystemFonts.CaptionFont;
-                MainInstructionColor = SystemColors.WindowText;
+                var baseFont = SystemFonts.MessageBoxFont ?? SystemFonts.DefaultFont;
+                MainInstructionFont = new Font(baseFont.FontFamily, baseFont.SizeInPoints * 1.4f, FontStyle.Regular);
+                MainInstructionColor = Color.FromArgb(0, 51, 153);
             }
         }
 #pragma warning restore SA1305 // Field names should not use Hungarian notation

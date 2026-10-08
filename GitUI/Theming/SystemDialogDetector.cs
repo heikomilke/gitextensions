@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 
 namespace GitUI.Theming
@@ -18,8 +18,7 @@ namespace GitUI.Theming
         {
             get
             {
-                var hwnd = NativeMethods.GetActiveWindow();
-                return hwnd != IntPtr.Zero && Control.FromHandle(hwnd) is null;
+                return false; // Linux/Mono build: no user32.GetActiveWindow
             }
         }
     }

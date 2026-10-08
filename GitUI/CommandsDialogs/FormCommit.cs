@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -416,12 +416,10 @@ namespace GitUI.CommandsDialogs
             const int TVM_SETEXTENDEDSTYLE = 0x1100 + 44;
             const int TVS_EX_DOUBLEBUFFER = 0x0004;
 
-            SendMessage(Handle, TVM_SETEXTENDEDSTYLE, (IntPtr)TVS_EX_DOUBLEBUFFER, (IntPtr)TVS_EX_DOUBLEBUFFER);
+            _ = TVM_SETEXTENDEDSTYLE + TVS_EX_DOUBLEBUFFER; // Linux/Mono build: no user32.SendMessage
             base.OnHandleCreated(e);
         }
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr SendMessage(IntPtr hwnd, int msg, IntPtr wp, IntPtr lp);
 
         protected override void OnApplicationActivated()
         {

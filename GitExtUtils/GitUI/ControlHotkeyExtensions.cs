@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -61,13 +61,13 @@ namespace GitUI
                 {
                     // Call begin / end update to prevent flickering transient state,
                     // after the word is selected and before it is erased.
-                    _beginUpdateMethod.Invoke(sender, parameters: null);
+                    _beginUpdateMethod?.Invoke(sender, parameters: null); // null on Mono
 
                     SetSelectionStart(from);
                     SetSelectionLength(length);
                     ClearSelectedText();
 
-                    _endUpdateMethod.Invoke(sender, parameters: null);
+                    _endUpdateMethod?.Invoke(sender, parameters: null); // null on Mono
 
                     (sender as ComboBox)?.Refresh();
                 }
@@ -172,8 +172,16 @@ namespace GitUI
                     switch (sender)
                     {
                         case TextBoxBase t:
-                            _setSelectedTextInternalMethod.Invoke(t,
-                                new object[] { string.Empty, /* clear undo */ false });
+                            if (_setSelectedTextInternalMethod is null)
+                            {
+                                t.SelectedText = string.Empty; // Mono has no SetSelectedTextInternal
+                            }
+                            else
+                            {
+                                _setSelectedTextInternalMethod.Invoke(t,
+                                    new object[] { string.Empty, /* clear undo */ false });
+                            }
+
                             return;
                         case ComboBox cb:
                             cb.SelectedText = string.Empty;

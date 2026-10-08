@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Drawing;
@@ -26,11 +26,6 @@ namespace GitUI.Avatars
                 return null;
             }
 
-            // check network connectivity
-            if (!NativeMethods.InternetGetConnectedState(out _, 0))
-            {
-                return null;
-            }
 
             ClearOldCacheEntries();
 

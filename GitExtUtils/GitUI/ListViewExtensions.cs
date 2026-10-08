@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -63,8 +63,23 @@ namespace GitUI
         /// A workaround for <see cref="ListViewItem.Bounds"/> which throws <see cref="ArgumentException"/>
         /// on item from a collapsed <see cref="ListViewGroup"/>.
         /// </summary>
-        public static Rectangle BoundsOrEmpty(this ListViewItem item) =>
-            (Rectangle)_getItemRectOrEmptyMethod.Value.Invoke(item.ListView, new object[] { item.Index });
+        public static Rectangle BoundsOrEmpty(this ListViewItem item)
+        {
+            if (_getItemRectOrEmptyMethod.Value is null)
+            {
+                // Mono has no GetItemRectOrEmpty
+                try
+                {
+                    return item.Bounds;
+                }
+                catch (ArgumentException)
+                {
+                    return Rectangle.Empty;
+                }
+            }
+
+            return (Rectangle)_getItemRectOrEmptyMethod.Value.Invoke(item.ListView, new object[] { item.Index });
+        }
 
         private static readonly Lazy<MethodInfo> _getItemRectOrEmptyMethod =
             new Lazy<MethodInfo>(() => typeof(ListView).GetMethod(

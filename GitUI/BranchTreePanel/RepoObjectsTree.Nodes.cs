@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
@@ -365,7 +365,7 @@ namespace GitUI.BranchTreePanel
                     // EnsureVisible leads to horizontal scrolling in some cases. We make sure to force horizontal
                     // scroll back to 0. Note that we use SendMessage rather than SetScrollPos as the former works
                     // outside of Begin/EndUpdate.
-                    NativeMethods.SendMessageW(hwnd, NativeMethods.WM_HSCROLL, (IntPtr)NativeMethods.SBH.LEFT, IntPtr.Zero);
+                    _ = hwnd; // Linux/Mono build: no user32.SendMessage
                 }
             }
         }
@@ -436,31 +436,31 @@ namespace GitUI.BranchTreePanel
                 return DisplayText();
             }
 
+            // Linux/Mono build: Mono's TreeNode.NodeFont returns the TreeView's (shared) font when unset,
+            // so we must only ever dispose fonts we created ourselves.
+            private Font _ownNodeFont;
+
             protected void SetNodeFont(FontStyle style)
             {
                 if (style == FontStyle.Regular)
                 {
                     // For regular, set to null to use the NativeTreeView font
-                    if (TreeViewNode.NodeFont is not null)
-                    {
-                        TreeViewNode.NodeFont.Dispose();
-                        TreeViewNode.NodeFont = null;
-                    }
+                    _ownNodeFont?.Dispose();
+                    _ownNodeFont = null;
+                    TreeViewNode.NodeFont = null;
                 }
                 else
                 {
                     // If current font doesn't have the input style, get rid of it
-                    if (TreeViewNode.NodeFont is not null && !TreeViewNode.NodeFont.Style.HasFlag(style))
+                    if (_ownNodeFont is not null && !_ownNodeFont.Style.HasFlag(style))
                     {
-                        TreeViewNode.NodeFont.Dispose();
-                        TreeViewNode.NodeFont = null;
+                        _ownNodeFont.Dispose();
+                        _ownNodeFont = null;
                     }
 
                     // If non-null, our font is already valid, otherwise create a new one
-                    if (TreeViewNode.NodeFont is null)
-                    {
-                        TreeViewNode.NodeFont = new Font(AppSettings.Font, style);
-                    }
+                    _ownNodeFont ??= new Font(AppSettings.Font, style);
+                    TreeViewNode.NodeFont = _ownNodeFont;
                 }
             }
 

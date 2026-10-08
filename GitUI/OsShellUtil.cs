@@ -61,7 +61,7 @@ namespace GitUI
         /// <returns>The path selected by the user, or null if the user cancels the dialog.</returns>
         public static string PickFolder(IWin32Window ownerWindow, string selectedPath = null)
         {
-            if (GitCommands.Utils.EnvUtils.IsWindowsVistaOrGreater())
+            if (GitCommands.Utils.EnvUtils.RunningOnWindows() && GitCommands.Utils.EnvUtils.IsWindowsVistaOrGreater())
             {
                 // use Vista+ dialog
                 using (var dialog = new CommonOpenFileDialog())
@@ -73,7 +73,9 @@ namespace GitUI
                         dialog.InitialDirectory = selectedPath;
                     }
 
-                    var result = dialog.ShowDialog(ownerWindow.Handle);
+                    // Invoke via reflection to avoid an overload resolution dependency on WPF (ShowDialog(Window)).
+                    var showDialog = dialog.GetType().GetMethod(nameof(CommonFileDialog.ShowDialog), new[] { typeof(IntPtr) });
+                    var result = (CommonFileDialogResult)showDialog.Invoke(dialog, new object[] { ownerWindow.Handle });
 
                     if (result == CommonFileDialogResult.Ok)
                     {

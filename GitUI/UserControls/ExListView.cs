@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -66,7 +66,8 @@ namespace GitUI.UserControls
                 pt = location
             };
 
-            if (SendMessageW(Handle, LVM_SUBITEMHITTEST, (IntPtr)(-1), ref info) == new IntPtr(-1))
+            // Linux/Mono build: no user32.SendMessage, group hit testing unsupported.
+            if (true)
             {
                 return null;
             }
@@ -206,7 +207,7 @@ namespace GitUI.UserControls
                         return;
                 }
 
-                newValue ??= GetScrollPos(Handle, SB.VERT);
+                newValue ??= 0; // Linux/Mono build: no user32.GetScrollPos
                 Scroll?.Invoke(this, new ScrollEventArgs(type, newValue.Value));
 
                 short LowWord(long number) =>
@@ -284,7 +285,7 @@ namespace GitUI.UserControls
             lvgroup.mask = LVGF.STATE;
             lvgroup.iGroupId = groupId;
 
-            NativeMethods.SendMessageW(Handle, LVM_SETGROUPINFO, (IntPtr)groupId, ref lvgroup);
+            _ = lvgroup; // Linux/Mono build: no user32.SendMessage
         }
 
         /// <summary>
@@ -296,6 +297,11 @@ namespace GitUI.UserControls
         /// </summary>
         private void BeginGroupInsertion()
         {
+            if (ListViewDefaultGroupProperty is null || ListViewGroupListProperty is null)
+            {
+                return; // Mono: internal group list not accessible
+            }
+
             // .NET ListView.Groups.Insert(...) implementation has a bug
             // It does not count the technical "Default" group from ListView when passing inserted
             // group index to native Win32 ListView.
@@ -316,6 +322,11 @@ namespace GitUI.UserControls
 
         private void EndGroupInsertion()
         {
+            if (ListViewDefaultGroupProperty is null || ListViewGroupListProperty is null)
+            {
+                return; // Mono: internal group list not accessible
+            }
+
             var defaultGroup = ListViewDefaultGroupProperty.GetValue(this);
             var list = (ArrayList)ListViewGroupListProperty.GetValue(Groups);
 

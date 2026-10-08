@@ -30,7 +30,7 @@ namespace GitExtensions
         [STAThread]
         private static void Main()
         {
-            if (Environment.OSVersion.Version.Major >= 6)
+            if (EnvUtils.RunningOnWindows() && Environment.OSVersion.Version.Major >= 6)
             {
                 SetProcessDPIAware();
             }
