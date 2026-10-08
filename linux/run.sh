@@ -11,4 +11,9 @@ mkdir -p "$PROFILE/config" "$PROFILE/data"
 export MONO_PATH="$REPO/artifacts/mono-facades${MONO_PATH:+:$MONO_PATH}"
 export XDG_CONFIG_HOME="$PROFILE/config"
 export XDG_DATA_HOME="$PROFILE/data"
+# When started from a desktop launcher there is no terminal: keep stderr (crash reports,
+# diagnostics) in the profile directory instead.
+if [ ! -t 2 ]; then
+  exec 2>"$PROFILE/last-run.log"
+fi
 cd "$OUT" && exec mono GitExtensions.exe "$@"

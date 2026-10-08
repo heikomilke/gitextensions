@@ -69,6 +69,15 @@ Categories=Development;
 StartupWMClass=GitExtensions
 ```
 
+## Diagnostics
+
+* When started without a terminal (desktop launcher), stderr goes to `<profile>/last-run.log`
+  (default `~/.config/gitextensions-linux/last-run.log`). Crash reports and Mono warnings end
+  up there.
+* `GITEXT_DEBUG_LAYOUT=1 linux/run.sh browse /path/to/repo` prints the control tree of the
+  main window (visibility and bounds) to stderr a few seconds after it opens. Useful when a
+  pane does not show up.
+
 ## What was changed for Linux
 
 * Resource paths with wrong case (`Images.resx`) and a plugin folder that existed twice

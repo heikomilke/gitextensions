@@ -678,6 +678,13 @@ namespace GitUI.CommandsDialogs
 
         protected override void OnLoad(EventArgs e)
         {
+            if (GitExtUtils.GitUI.DebugLayout.Enabled)
+            {
+                var debugTimer = new System.Windows.Forms.Timer { Interval = 5000 };
+                debugTimer.Tick += (_, __) => { debugTimer.Stop(); GitExtUtils.GitUI.DebugLayout.Dump(RightSplitContainer); GitExtUtils.GitUI.DebugLayout.Dump(RevisionsSplitContainer, 2); };
+                debugTimer.Start();
+            }
+
             _formBrowseMenus.CreateToolbarsMenus(ToolStripMain, ToolStripFilters, ToolStripScripts);
 
             HideVariableMainMenuItems();
