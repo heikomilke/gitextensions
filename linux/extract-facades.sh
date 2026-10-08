@@ -13,4 +13,4 @@ fi
 mkdir -p "$DEST"
 echo "==> extracting Mono facade assemblies into $DEST"
 docker run --rm -v "$DEST:/out" mono:6.12 sh -c \
-  'cp /usr/lib/mono/4.5/Facades/*.dll /out/ && cp /usr/lib/mono/4.5/netstandard.dll /out/ && chown -R '"$(id -u):$(id -g)"' /out'
+  'cp /usr/lib/mono/4.5/Facades/*.dll /out/ && [ -f /usr/lib/mono/4.5/netstandard.dll ] && cp /usr/lib/mono/4.5/netstandard.dll /out/; chown -R '"$(id -u):$(id -g)"' /out'
