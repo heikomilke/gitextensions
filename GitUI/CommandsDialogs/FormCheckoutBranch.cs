@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -197,7 +197,12 @@ namespace GitUI.CommandsDialogs
             for (var i = 0; i < controls1.Length; i++)
             {
                 var margin = controls1[i].Margin;
-                height = controls1[i].Height + margin.Top + margin.Bottom;
+
+                // Linux/Mono build: the designer heights assume the Windows default font; measure the
+                // real preferred height so rows are not clipped with larger fonts.
+                controls1[i].AutoSize = true;
+                int preferredHeight = controls1[i].GetPreferredSize(new Size(tlpnlMain.ClientSize.Width, 0)).Height;
+                height = Math.Max(controls1[i].Height, preferredHeight) + margin.Top + margin.Bottom;
                 _controls.Add(controls1[i], height);
 
                 tlpnlMain.RowStyles[i].Height = height;
@@ -585,8 +590,11 @@ namespace GitUI.CommandsDialogs
 
         private void Branches_Validating(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            e.Cancel = Branches.SelectedIndex == -1 || !Branches.Items.Contains(Branches.Text);
-            Errors.SetError(Branches, e.Cancel ? _invalidBranchName.ToString() : "");
+            // Linux/Mono build: Mono validates on close, so cancelling here would make the dialog
+            // impossible to close without a branch. Only flag the error; PerformCheckout re-checks.
+            bool invalid = Branches.SelectedIndex == -1 || !Branches.Items.Contains(Branches.Text);
+            Errors.SetError(Branches, invalid ? _invalidBranchName.ToString() : "");
+            e.Cancel = false;
         }
 
         private void Branches_TextChanged(object sender, EventArgs e)
