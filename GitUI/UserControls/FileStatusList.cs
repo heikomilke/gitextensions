@@ -67,6 +67,7 @@ namespace GitUI
         public FileStatusList()
         {
             InitializeComponent();
+            GitExtUtils.GitUI.MonoListViewFixes.DisableBoxSelect(FileStatusListView);
             InitialiseFiltering();
             CreateOpenSubmoduleMenuItem();
             _sortByContextMenu = new SortDiffListContextMenuItem(DiffListSortService.Instance)
@@ -1400,7 +1401,9 @@ namespace GitUI
             }
 
             // DRAG
-            if (e.Button == MouseButtons.Left)
+            // Linux/Mono build: dragging files out of the list to other applications is disabled;
+            // Mono turned ordinary clicks into drags far too easily.
+            if (e.Button == MouseButtons.Left && false)
             {
                 if (SelectedItems.Any())
                 {

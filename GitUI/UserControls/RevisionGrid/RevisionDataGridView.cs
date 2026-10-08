@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -138,8 +138,10 @@ namespace GitUI.UserControls.RevisionGrid
                 BackgroundColor = SystemColors.Window;
                 CellBorderStyle = DataGridViewCellBorderStyle.None;
                 ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+                AllowUserToResizeRows = false; // Linux/Mono build: Mono auto-resizes rows on double-click and needs a cell font for that
                 DefaultCellStyle = new DataGridViewCellStyle
                 {
+                    Font = AppSettings.Font,
                     Alignment = DataGridViewContentAlignment.MiddleLeft,
                     BackColor = SystemColors.Window,
                     ForeColor = SystemColors.ControlText,

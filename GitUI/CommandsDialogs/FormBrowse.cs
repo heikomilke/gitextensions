@@ -680,8 +680,47 @@ namespace GitUI.CommandsDialogs
         {
             if (GitExtUtils.GitUI.DebugLayout.Enabled)
             {
-                var debugTimer = new System.Windows.Forms.Timer { Interval = 5000 };
-                debugTimer.Tick += (_, __) => { debugTimer.Stop(); GitExtUtils.GitUI.DebugLayout.Dump(RightSplitContainer); GitExtUtils.GitUI.DebugLayout.Dump(RevisionsSplitContainer, 2); };
+                foreach (var tracked in new Control[] { MainSplitContainer, RightSplitContainer, RevisionsSplitContainer, CommitInfoTabControl, toolPanel, toolPanel.ContentPanel })
+                {
+                    var control = tracked;
+                    int created = control.IsHandleCreated ? 1 : 0;
+                    control.HandleCreated += (_, __) =>
+                    {
+                        created++;
+                        Console.Error.WriteLine($"[handle] {control.Name} ({control.GetType().Name}) handle created #{created} = {control.Handle:x}");
+                        if (created > 1)
+                        {
+                            Console.Error.WriteLine(Environment.StackTrace);
+                        }
+                    };
+                    control.HandleDestroyed += (_, __) => Console.Error.WriteLine($"[handle] {control.Name} handle destroyed\n{Environment.StackTrace}");
+                }
+            }
+
+            // Linux/Mono build: Mono sometimes leaves the X11 window of a control unmapped after the
+            // start-up layout (control is Visible but never painted). Check and repair shortly after load.
+            var remapTimer = new System.Windows.Forms.Timer { Interval = 1500 };
+            remapTimer.Tick += (_, __) =>
+            {
+                remapTimer.Stop();
+                remapTimer.Dispose();
+                GitExtUtils.GitUI.MonoX11.EnsureMapped(RightSplitContainer);
+
+                // Mono occasionally loses the initial expose of the lower pane: force a full repaint.
+                RightSplitContainer.Invalidate(invalidateChildren: true);
+                RightSplitContainer.Update();
+            };
+            remapTimer.Start();
+
+            if (GitExtUtils.GitUI.DebugLayout.Enabled)
+            {
+                var debugTimer = new System.Windows.Forms.Timer { Interval = 10000 };
+                debugTimer.Tick += (_, __) =>
+                {
+                    Console.Error.WriteLine($"[layout] {DateTime.Now:HH:mm:ss} form state={WindowState} bounds={Bounds} client={ClientSize} dashboard={_dashboard?.Visible}");
+                    GitExtUtils.GitUI.DebugLayout.Dump(RightSplitContainer, 3);
+                    GitExtUtils.GitUI.MonoX11.EnsureMapped(RightSplitContainer);
+                };
                 debugTimer.Start();
             }
 
@@ -3182,8 +3221,14 @@ namespace GitUI.CommandsDialogs
 
         private void LayoutRevisionInfo()
         {
-            // Handle must be created prior to insertion
-            _ = CommitInfoTabControl.Handle;
+            // Handle must be created prior to insertion.
+            // Linux/Mono build: only when the parent chain already has handles. Creating a child handle
+            // first makes Mono parent its X11 window to a foster window, and it never moves under the real
+            // parent later (the lower pane then exists but is never shown).
+            if (CommitInfoTabControl.Parent?.IsHandleCreated == true)
+            {
+                _ = CommitInfoTabControl.Handle;
+            }
 
             RevisionInfo.SuspendLayout();
             CommitInfoTabControl.SuspendLayout();

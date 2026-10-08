@@ -96,6 +96,14 @@ StartupWMClass=GitExtensions
 * Transparent `BackColor` on tool strips removed (Mono rejects it on those controls).
 * The crash reporter no longer uses the Windows task dialog; errors go to stderr and to the
   built-in bug report form.
+* The browse form forced the handle of the lower tab control before its parent containers had
+  handles. Mono then parents the X11 window to a foster window and never re-parents it, so the
+  commit info / diff / file tree pane existed but was never shown. The handle is now only
+  pre-created when the parent chain exists.
+* Dragging files out of the file status list is disabled, and Mono's rubber-band selection in
+  that list is cancelled, so a click only selects.
+* The revision grid gets a default cell font and no user row resizing; Mono crashed on
+  double-click without them.
 * Mono's Windows Forms imports the desktop (GTK) colour scheme into `SystemColors`, but only
   partially, so a dark desktop theme produced a mix of dark and white surfaces. At startup the
   application now resets Mono's colour table to the light Windows palette

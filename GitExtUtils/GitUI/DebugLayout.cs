@@ -27,7 +27,7 @@ namespace GitExtUtils.GitUI
                 TabControl t => $" tabs={t.TabCount} sel={t.SelectedIndex} display={t.DisplayRectangle}",
                 _ => ""
             };
-            Console.Error.WriteLine($"[layout] {new string(' ', depth * 2)}{c.Name,-28} {c.GetType().Name,-24} vis={c.Visible,-5} created={c.IsHandleCreated,-5} bounds={c.Bounds} dock={c.Dock}{extra}");
+            Console.Error.WriteLine($"[layout] {new string(' ', depth * 2)}{c.Name,-28} {c.GetType().Name,-24} vis={c.Visible,-5} x11={MonoX11.Describe(c),-8} hwnd={(c.IsHandleCreated ? c.Handle.ToString("x") : "-"),-8} bounds={c.Bounds} dock={c.Dock}{extra}");
             if (depth >= maxDepth)
             {
                 return;
