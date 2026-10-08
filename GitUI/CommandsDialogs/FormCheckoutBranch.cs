@@ -130,6 +130,7 @@ namespace GitUI.CommandsDialogs
             void FormCheckoutBranch_Shown(object sender, EventArgs e)
             {
                 Shown -= FormCheckoutBranch_Shown;
+                RemeasureRows();
                 RecalculateSizeConstraints();
             }
         }
@@ -178,6 +179,50 @@ namespace GitUI.CommandsDialogs
             return ShowDialog(owner);
         }
 
+        private Control[] _rowControls;
+
+        /// <summary>
+        /// Linux/Mono build: AutoSize heights are only reliable once the form is shown and laid out,
+        /// so the row heights measured in <see cref="ApplyLayout"/> are refreshed from the live layout.
+        /// </summary>
+        private void RemeasureRows()
+        {
+            if (_rowControls is null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _rowControls.Length; i++)
+            {
+                var control = _rowControls[i];
+                control.PerformLayout();
+                var margin = control.Margin;
+                int preferred = control.GetPreferredSize(new Size(tlpnlMain.ClientSize.Width, 0)).Height;
+
+                if (control is GroupBox groupBox)
+                {
+                    // Mono's GroupBox ignores docked children in its preferred size: measure them ourselves
+                    // and add the caption/border area (the part of the box outside DisplayRectangle).
+                    int innerWidth = Math.Max(1, groupBox.DisplayRectangle.Width);
+                    int inner = groupBox.Controls.Cast<Control>()
+                        .Select(child => child.GetPreferredSize(new Size(innerWidth, 0)).Height + child.Margin.Top + child.Margin.Bottom)
+                        .DefaultIfEmpty(0)
+                        .Max();
+                    int frame = Math.Max(groupBox.Height - groupBox.DisplayRectangle.Height, groupBox.Font.Height + groupBox.Padding.Top + groupBox.Padding.Bottom);
+                    preferred = Math.Max(preferred, inner + frame);
+                }
+
+                int height = Math.Max(control.Height, preferred) + margin.Top + margin.Bottom;
+                _controls[control] = height;
+                tlpnlMain.RowStyles[i].Height = height;
+
+                if (GitExtUtils.GitUI.DebugLayout.Enabled)
+                {
+                    Console.Error.WriteLine($"[layout] checkout row {i} {control.Name}: height={control.Height} preferred={preferred} -> {height}");
+                }
+            }
+        }
+
         private void ApplyLayout()
         {
             var controls1 = new Control[]
@@ -188,6 +233,7 @@ namespace GitUI.CommandsDialogs
                 localChangesGB
             };
 
+            _rowControls = controls1;
             localChangesGB.AutoSize = true;
             localChangesGB.Dock = DockStyle.Fill;
 
@@ -561,7 +607,8 @@ namespace GitUI.CommandsDialogs
                        + tlpnlMain.Height + tlpnlMain.Margin.Top + tlpnlMain.Margin.Bottom + DpiUtil.Scale(30);
 
             MinimumSize = new Size(tlpnlMain.PreferredSize.Width + DpiUtil.Scale(70), height);
-            MaximumSize = new Size(Screen.PrimaryScreen.Bounds.Width, height);
+            // Linux/Mono build: do not lock the height; let the user enlarge the dialog vertically.
+            MaximumSize = new Size(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
             Size = new Size(Width, height);
             ResumeLayout();
         }
