@@ -210,9 +210,19 @@ namespace GitUI.CommandsDialogs
                         .Max();
                     int frame = Math.Max(groupBox.Height - groupBox.DisplayRectangle.Height, groupBox.Font.Height + groupBox.Padding.Top + groupBox.Padding.Bottom);
                     preferred = Math.Max(preferred, inner + frame);
+
+                    // Mono's TableLayoutPanel sizes the row from the control's preferred size, so force it.
+                    groupBox.MinimumSize = new Size(groupBox.MinimumSize.Width, preferred);
+                }
+                else if (control == horLine)
+                {
+                    // Keep the separator a 2px line; AutoSize would turn the label into a text-high box.
+                    control.AutoSize = false;
+                    control.Height = 2;
+                    preferred = 2;
                 }
 
-                int height = Math.Max(control.Height, preferred) + margin.Top + margin.Bottom;
+                int height = (control == horLine ? preferred : Math.Max(control.Height, preferred)) + margin.Top + margin.Bottom;
                 _controls[control] = height;
                 tlpnlMain.RowStyles[i].Height = height;
 
@@ -246,7 +256,7 @@ namespace GitUI.CommandsDialogs
 
                 // Linux/Mono build: the designer heights assume the Windows default font; measure the
                 // real preferred height so rows are not clipped with larger fonts.
-                controls1[i].AutoSize = true;
+                controls1[i].AutoSize = controls1[i] != horLine;
                 int preferredHeight = controls1[i].GetPreferredSize(new Size(tlpnlMain.ClientSize.Width, 0)).Height;
                 height = Math.Max(controls1[i].Height, preferredHeight) + margin.Top + margin.Bottom;
                 _controls.Add(controls1[i], height);
@@ -255,7 +265,7 @@ namespace GitUI.CommandsDialogs
                 tlpnlMain.RowStyles[i].SizeType = SizeType.Absolute;
 
                 controls1[i].Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-                controls1[i].AutoSize = true;
+                controls1[i].AutoSize = controls1[i] != horLine;
             }
 
             tlpnlMain.RowStyles[2].Height = Remotebranch.Checked ? _controls[tlpnlRemoteOptions] : 0;
